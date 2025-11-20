@@ -1,0 +1,6 @@
+PRODUCT_NAME="//*[@itemprop='name'] "
+PRODUCT_PRICE="//*[starts-with(@id,'product-price-')]//*[@class='price' and contains(text(), '$')]"
+PRODUCT_RATING="//*[@itemprop='ratingValue']"
+PRODUCT_NOTE="(//*[@id='maincontent']//*[@class='testing_note'])[2]"
+PRODUCT_FLAVOUR="(//div[@class='value' and contains(@aria-label, 'Body')])[1]"
+PRODUCT_SWEETNESS= "(//div[@class='value' and contains(@aria-label, 'Sweetness')])"
