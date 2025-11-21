@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maintain Inventory</title>
+</head>
+<body>
+    <p><a href="{% url 'wines:list' %}">← Back to wines</a></p>
+    <h1>Maintain Inventory</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Inventory</button>
+    </form>
+
+    <h2>Current Inventory</h2>
+    <table border="1">
+        <tr>
+            <th>Store</th>
+            <th>Wine</th>
+            <th>Quantity</th>
+        </tr>
+        {% for inv in inventories %}
+            <tr>
+                <td>{{ inv.store.name }}</td>
+                <td>{{ inv.wine.name }}</td>
+                <td>{{ inv.quantity }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3">No inventory records yet.</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

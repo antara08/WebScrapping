@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ wine.name }}</title>
+</head>
+<body>
+    {% if messages %}
+  <ul>
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+        {{ message }}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+    <p><a href="{% url 'wines:list' %}">← Back to wines</a></p>
+
+    <h1>{{ wine.name }}</h1>
+    <p><strong>Manufacturer:</strong> {{ wine.manufacturer }}</p>
+    <p><strong>Type:</strong> {{ wine.get_type_display }}</p>
+    <p><strong>Vintage:</strong> {{ wine.is_vintage|yesno:"Yes,No" }}</p>
+    <p><strong>Sweetness:</strong> {{ wine.get_sweetness_display }}</p>
+    <p><strong>Price:</strong> {{ wine.price }}</p>
+
+    <h2>Stores carrying this wine</h2>
+    <table border="1">
+        <tr>
+            <th>Store</th>
+            <th>Address</th>
+            <th>Quantity</th>
+        </tr>
+        {% for inv in inventories %}
+            <tr>
+                <td>{{ inv.store.name }}</td>
+                <td>{{ inv.store.address }}</td>
+                <td>{{ inv.quantity }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3">No inventory found.</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

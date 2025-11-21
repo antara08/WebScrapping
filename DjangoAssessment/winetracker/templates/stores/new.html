@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Store</title>
+</head>
+<body>
+    <p><a href="{% url 'wines:list' %}">← Back to wines</a></p>
+    <h1>Create Store</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Store</button>
+    </form>
+</body>
+</html>

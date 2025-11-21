@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wines</title>
+</head>
+<body>
+    {% if messages %}
+  <ul>
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+        {{ message }}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+    <h1>Wines</h1>
+
+    <p>
+        <a href="{% url 'stores:new' %}">Create Store</a> |
+        <a href="{% url 'inventory:maintain' %}">Maintain Inventory</a>
+    </p>
+
+    <h2>Add Wine</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Wine</button>
+    </form>
+
+    <h2>Wine List</h2>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Manufacturer</th>
+            <th>Type</th>
+            <th>Vintage</th>
+            <th>Price</th>
+        </tr>
+        {% for wine in page_obj %}
+            <tr>
+                <td><a href="{% url 'wines:detail' wine.id %}">{{ wine.name }}</a></td>
+                <td>{{ wine.manufacturer }}</td>
+                <td>{{ wine.get_type_display }}</td>
+                <td>{{ wine.is_vintage|yesno:"Yes,No" }}</td>
+                <td>{{ wine.price }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5">No wines yet.</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <div style="margin-top: 1rem;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">« Prev</a>
+        {% endif %}
+
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Next »</a>
+        {% endif %}
+    </div>
+</body>
+</html>
