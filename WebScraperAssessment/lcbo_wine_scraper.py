@@ -26,9 +26,9 @@ def main():
 
 
 
-    #Create folder on desktop to store the Excel sheet
-    desktop=os.path.join(os.path.expanduser("~"),"Desktop")
-    folder=os.path.join(desktop,"Wine_Details")
+    #Create folder Wine_Details in the cwd to store the Excel sheet
+    folder = os.path.join(os.getcwd(), "Wine_Details")
+    os.makedirs(folder, exist_ok=True)
 
     #Create folder if it does not exist
     os.makedirs(folder,exist_ok=True)
