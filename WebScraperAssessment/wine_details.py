@@ -2,8 +2,87 @@ import re
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.common.exceptions import TimeoutException,NoSuchElementException
-from locators import PRODUCT_PRICE,PRODUCT_RATING,PRODUCT_NOTE,PRODUCT_NAME
+from selenium.common.exceptions import TimeoutException,NoSuchElementException,ElementClickInterceptedException
+from locators import PRODUCT_PRICE,PRODUCT_RATING,PRODUCT_NOTE,PRODUCT_NAME,CHECK_AVAILABLITY
+
+
+#Cookie banner handling
+def close_cookie_banner(driver):
+    try:
+        banner = driver.find_element(By.ID, "notice-cookie-block")
+        if banner.is_displayed():
+            try:
+                close_btn = driver.find_element(By.ID, "btn-cookie-allow")
+                driver.execute_script("arguments[0].scrollIntoView(true);", close_btn)
+                close_btn.click()
+            except Exception:
+                # Fallback: force-hide if click fails
+                driver.execute_script("arguments[0].style.display='none';", banner)
+    except Exception:
+        # No banner found, or already closed
+        pass
+
+
+def availability(driver):
+
+    stores_availablity=[]
+    wait = WebDriverWait(driver, 20)
+
+    #Handling cookie banner ----
+    close_cookie_banner(driver)
+
+    #Click on 'Check Availability in All Stores' link
+    try:
+        availability_btn = wait.until(ec.element_to_be_clickable(
+        (By.XPATH,CHECK_AVAILABLITY )))
+
+         # Scroll into view
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block:'center'});", availability_btn
+        )
+        try:
+            availability_btn.click()
+        except ElementClickInterceptedException:
+            # JS click
+            driver.execute_script("arguments[0].click();", availability_btn)
+    
+    except Exception as e:
+        print("Availability button not found.",e)
+    #--------------------------------
+    #If switching to new tab is required
+    try:
+        driver.switch_to.window(driver.window_handles[-1])
+    except:
+        pass
+    #Waiting for table to load---------------------------
+    try:
+        wait.until(ec.presence_of_element_located(
+            (By.ID, "storesTable")
+        ))
+    except Exception as e:
+        print("Inventory table did not load:", e)
+    #-------------------------------------
+    #Get availablity data---------------
+    rows = driver.find_elements(By.XPATH, "//table[@id='storesTable']/tbody/tr")
+    for row in rows:
+        try:
+            city = row.find_element(By.CLASS_NAME, "city_txt").text.strip()
+            address = row.find_element(By.CLASS_NAME, "address_txt").text.strip()
+            qty = row.find_element(By.CLASS_NAME, "quantity_avail_txt").text.strip()
+
+            stores_availablity.append({
+                "city": city,
+                "address": address,
+                "quantity": qty
+            })
+        except:
+            continue
+
+
+    #-----------------------------
+    return stores_availablity
+
+
 
 
 def wine_details(driver,url):
@@ -11,6 +90,10 @@ def wine_details(driver,url):
     details={}
     try:
         driver.get(url)
+
+        #Handling cookie banner incase it appears
+        close_cookie_banner(driver)
+
     except TimeoutException:
         print(f"Page load timeout for:{url}")
         driver.execute_script("window.stop();")
@@ -121,7 +204,9 @@ def wine_details(driver,url):
     except Exception:
         pass
 
-    #--------------------------------
+
+    details["availability"] = availability(driver)
+    #-------------------------------------------
     return details    
        
 

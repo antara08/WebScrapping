@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from selenium.common.exceptions import NoSuchElementException
 import wine_details as wd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -18,9 +19,11 @@ def main():
     options=Options()
     options.add_argument("--start-maximized")
     driver= webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
-    driver.set_page_load_timeout(30)
+    driver.set_page_load_timeout(20)
     wine_urls=[]
-    all_wine_details = []
+    all_wine_details=[]
+    availability=[]
+
 
 
     #Create folder on desktop to store the Excel sheet
@@ -63,7 +66,6 @@ def main():
     finally:
         driver.quit()
 
-    print("Total wines scraped:", len(all_wine_details))
 
     #converting dictionary to pandas dataframe
     df_wines = pd.DataFrame(all_wine_details)
@@ -87,13 +89,32 @@ def main():
     "varietal": "Varietal",
     })
 
-    # Delete old file if exists
+
+
+    #Store availablity of each wine----------------------------
+    for wine in all_wine_details:
+        wine_name = wine.get("name")
+        for store in wine.get("availability", []):
+            availability.append({
+                "Wine Name": wine_name,
+                "City": store.get("city"),
+                "Address": store.get("address"),
+                "Quantity": store.get("quantity"),
+            })
+
+    df_availability = pd.DataFrame(availability)
+
+    #------------------------------------
+
+
+    # Delete old file if exists---------------------
     if os.path.exists(excel_path):
         os.remove(excel_path)
 
-    #Write to sheet
+    #Write to sheet---------------------------------------------
     with pd.ExcelWriter(excel_path,engine="openpyxl") as writer:
         df_wines.to_excel(writer,sheet_name="Wine List",index=False)
+        df_availability.to_excel(writer, sheet_name="Store Ref", index=False)
     
 
 
